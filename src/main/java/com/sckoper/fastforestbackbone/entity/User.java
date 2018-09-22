@@ -10,7 +10,8 @@ import java.util.List;
  * @author Leon Croft
  */
 @Data
-@Table(name = "user_tal", catalog = "forestdb_dev", schema = "sde")
+@Entity
+@Table(name = "user_tbl", catalog = "forestdb_dev", schema = "sde")
 public class User {
 
     @Id
@@ -33,6 +34,6 @@ public class User {
     @JoinTable(name = "user_role", catalog = "forestdb_dev", schema = "sde", joinColumns = {@JoinColumn(name = "userId")}, inverseJoinColumns = {@JoinColumn(name = "roleId")})
     private List<Role> roles;
 
-    @OneToMany(mappedBy = "user_tbl")
+    @OneToMany(mappedBy = "user")
     private List<UserReport> userReports;
 }
