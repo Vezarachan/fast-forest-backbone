@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,8 @@ public class UserController {
      */
     @ApiOperation("获取所有用户")
     @GetMapping("/")
+    @ResponseBody
+    @PreAuthorize("hasAuthority('管理员')")
     public Map<String, Object> getUserList() {
         List<User> userList = userService.findAllUsers();
         Map<String, Object> map = new HashMap<>();
@@ -57,8 +60,9 @@ public class UserController {
      * @return User
      */
     @ApiOperation("根据用户名获取用户")
-    @ApiImplicitParam(name = "user", value = "用户实体", required = true, dataType = "User")
+    @ApiImplicitParam(name = "userName", value = "用户名", required = true, dataType = "String")
     @GetMapping("/{userName}")
+    @ResponseBody
     public User getUser(@PathVariable(name = "userName") String userName) {
         return userService.findUserByUserName(userName);
     }
@@ -71,6 +75,7 @@ public class UserController {
     @ApiOperation("根据用户Id获取用户")
     @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "Integer")
     @GetMapping("/{userId}")
+    @ResponseBody
     public User getUser(@PathVariable(name = "userId") Integer userId) {
         return userService.findUserByUserId(userId);
     }
@@ -85,16 +90,8 @@ public class UserController {
     @PostMapping("/signup")
     @ResponseBody
     public ResponseMessage addUser(@Valid @RequestBody User user) {
-        User is_user = userService.findUserByUserName(user.getUserName());
-        ResponseMessage responseMessage;
-        if (is_user != null) {
-            responseMessage = ResultUtil.error(ResultEnum.USER_HAS_EXISTED);
-        }
-        else {
-            responseMessage = ResultUtil.success();
-            userService.addUser(user);
-        }
-        return responseMessage;
+        User tempUser = userService.addUser(user);
+        return ResultUtil.success(tempUser);
     }
 
     @ApiOperation("用户登录")
@@ -103,15 +100,17 @@ public class UserController {
             @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String")
     })
     @PostMapping("/login")
-    public ResponseMessage login(@RequestParam(value = "userName", required = true) String userName, @RequestParam(value = "password", required = true) String password) {
+    @ResponseBody
+    public ResponseMessage login(@RequestParam(value = "userName", required = true) String userName,
+                                 @RequestParam(value = "password", required = true) String password) {
         User user = userService.findUserByUserName(userName);
         if (user == null) {
             return ResultUtil.error(400, "用户名不存在");
         }
 
         PasswordEncoder encoder = new BCryptPasswordEncoder();
-        boolean is_password = encoder.matches(password, user.getPassword());
-        if (!is_password) {
+        boolean isPasswordCorrect = encoder.matches(password, user.getPassword());
+        if (!isPasswordCorrect) {
             return ResultUtil.error(400, "密码错误");
         }
         return ResultUtil.success(user);

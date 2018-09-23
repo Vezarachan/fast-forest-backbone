@@ -3,6 +3,7 @@ package com.sckoper.fastforestbackbone.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,6 +30,8 @@ public class User {
     private String phoneNumber;
 
     private String password;
+
+    private Date lastPasswordResetDate;
 
     @ManyToMany(targetEntity = Role.class)
     @JoinTable(name = "user_role", catalog = "forestdb_dev", schema = "sde", joinColumns = {@JoinColumn(name = "userId")}, inverseJoinColumns = {@JoinColumn(name = "roleId")})

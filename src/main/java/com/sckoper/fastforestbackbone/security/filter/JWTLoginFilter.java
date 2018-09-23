@@ -21,6 +21,7 @@ import java.util.Date;
 
 /**
  * 登录验证
+ *
  * @author Leon Croft
  */
 public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -33,13 +34,13 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     /**
      * 接收并解析用户凭证
-     * @param request 请求
+     * @param request  请求
      * @param response 响应
-     * @return
+     * @return Authetication
      * @throws AuthenticationException
      */
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response ) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
             User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
             return authenticationManager.authenticate(
